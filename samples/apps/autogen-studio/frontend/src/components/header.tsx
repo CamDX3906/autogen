@@ -10,17 +10,45 @@ import {
 import { Fragment } from "react";
 import { appContext } from "../hooks/provider";
 import { Link } from "gatsby";
-import React from "react";
+import React, { useState } from "react";
+import {Modal, Input, Form } from "antd";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
 const Header = ({ meta, link }: any) => {
-  const { user, logout } = React.useContext(appContext);
+  const { user, logout, login } = React.useContext(appContext);
   const userName = user ? user.name : "Unknown";
   const userAvatarUrl = user ? user.avatar_url : "";
   const user_id = user ? user.username : "unknown";
+  const [visible, setVisible] = useState(false);
+  const [email, setEmail] = useState('');
+  const [form] = Form.useForm();
+
+  const showModal = () => {
+    setVisible(true);
+  };
+
+  const emailValidator = (_:any, value:any) => {
+    if (!value) {
+      return Promise.reject(new Error('Please enter your email address'));
+    }
+    if (!value.endsWith('@goland.cn')) {
+      return Promise.reject(new Error('Email must end with @goland.cn'));
+    }
+    setEmail(value)
+    return Promise.resolve();
+  };
+  
+  const handleOk = () => {
+    setVisible(false);
+    login(email);
+  };
+
+  const handleCancel = () => {
+    setVisible(false);
+  };
 
   const links: any[] = [
     { name: "Build", href: "/build" },
@@ -129,6 +157,17 @@ const Header = ({ meta, link }: any) => {
               {
                 <div className="hidden lg:ml-4 md:flex md:items-center">
                   <DarkModeToggle />
+                  {!user && (
+                    <a
+                    href="#"
+                    onClick={() => {
+                      showModal()
+                    }}
+                    className= "bg-secondaryblock px-4 py-2 text-sm text-primary"
+                  >
+                    Sign In
+                  </a>
+                  )}
 
                   {user && (
                     <>
@@ -265,6 +304,24 @@ const Header = ({ meta, link }: any) => {
               </div>
             )}
           </Disclosure.Panel>
+
+          <Modal
+            title="Login In"
+            visible={visible}
+            onOk={handleOk}
+            onCancel={handleCancel}
+            okButtonProps={{ disabled: !email }}
+          >
+            <Form form={form} layout="vertical">
+              <Form.Item
+                name="email"
+                label="Please enter your real email address, for example: ***@goland.cn"
+                rules={[{ validator: emailValidator }]}
+              >
+                <Input placeholder="Please enter your email address" />
+              </Form.Item>
+            </Form>
+          </Modal>
         </>
       )}
     </Disclosure>
