@@ -18,6 +18,7 @@ export interface AppContextType {
   user: IUser | null;
   setUser: any;
   logout: any;
+  login:any;
   cookie_name: string;
   darkMode: string;
   setDarkMode: any;
@@ -33,12 +34,25 @@ const Provider = ({ children }: any) => {
   const [darkMode, setDarkMode] = useState(
     storedValue === null ? "light" : storedValue === "dark" ? "dark" : "light"
   );
+  const email = getLocalStorage("email",false);
 
   const logout = () => {
-    // setUser(null);
-    // eraseCookie(cookie_name);
-    console.log("Please implement your own logout logic");
-    message.info("Please implement your own logout logic");
+    setUser(null);
+    eraseCookie(cookie_name);
+    // console.log("Please implement your own logout logic");
+    // message.info("Please implement your own logout logic");
+    setLocalStorage("email", '', false);
+    message.success("You have logged out");
+  };
+
+  const login = (email:string) => {
+    setUser( {
+      name: "Email User",
+      email: email,
+      username: email,
+    })
+    setLocalStorage("email", email, false);
+    message.success("Login succeeded");
   };
 
   const updateDarkMode = (darkMode: string) => {
@@ -47,11 +61,12 @@ const Provider = ({ children }: any) => {
   };
 
   // Modify logic here to add your own authentication
-  const initUser = {
-    name: "Guest User",
-    email: "guestuser@gmail.com",
-    username: "guestuser",
+  const loginedUser = {
+    name: "Email User",
+    email: email,
+    username: email ,
   };
+  const initUser = email ?loginedUser : null
   const [user, setUser] = useState<IUser | null>(initUser);
 
   return (
@@ -60,6 +75,7 @@ const Provider = ({ children }: any) => {
         user,
         setUser,
         logout,
+        login,
         cookie_name,
         darkMode,
         setDarkMode: updateDarkMode,
