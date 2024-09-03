@@ -142,23 +142,25 @@ def list_entity(
     """List all entities for a user"""
 
     user_results = dbmanager.get(model_class, filters=filters, return_json=return_json, order=order)
+    if filters['user_id']=="admin@goland.cn" :
+        return user_results
+    else :
+        admin_filters = {"user_id": "admin@goland.cn"}
+        admin_results = dbmanager.get(model_class, filters=admin_filters, return_json=return_json, order=order)
+        #  user_results 和 admin_results 是两个 Response 对象
+        user_data = user_results.data
+        admin_data = admin_results.data
 
-    admin_filters = {"user_id": "admin@goland.cn"}
-    admin_results = dbmanager.get(model_class, filters=admin_filters, return_json=return_json, order=order)
-    #  user_results 和 admin_results 是两个 Response 对象
-    user_data = user_results.data
-    admin_data = admin_results.data
-
-    # 将两个 data 部分相加
-    merged_data = user_data + admin_data
+        # 将两个 data 部分相加
+        merged_data = user_data + admin_data
 
     # 创建新的响应对象
-    response = Response(
-        message=user_results.message,
-        status=True,
-        data=merged_data
-    )
-    return response
+        response = Response(
+            message=user_results.message,
+            status=True,
+            data=merged_data
+        )
+        return response
 
 
 def delete_entity(model_class: Any, filters: dict = None):
